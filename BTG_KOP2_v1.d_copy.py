@@ -721,13 +721,14 @@ class Create_Plaxis_Files(QTabWidget):   #define class
     #BELASTING BEREKENING VAN DE KRAAN + VERZAMEL PARAMETERS VAN VERSCHILLENDE SCHOTTEN OPTIES
     """ In onderstaande functie wordt gecheckt welke belasting opties zijn aangevinkt en op basis daarvan belasting berekend mede door het aanroepen van andere functies """
     def Calc_Bep_Stemp(self, W, L, Q, mv, gws):
+        #Q is de Q_kraan, de kraanbelasting
         self.Plaxis_Input = []
         q_rep_plaxis = Q/(W*L)   #druk op de ondergrond van de belasting. Dat is gewicht/oppervlakte
         q_d_plaxis = Q*self.gamma_kraan/(W*L)
         W_plaxis = min(W,L)         #width
         L_plaxis = max(W,L)         #length
-        fund_plaxis = mv
-        gws_plaxis = gws
+        fund_plaxis = mv            #aangrijppunt, dit moet misschien ook nog veranderd worden
+        gws_plaxis = gws            #grondwaterstand
         D_plaxis = 0
         Gv_plaxis = "n.v.t."
         Case_nr = 1000000
@@ -744,13 +745,13 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         """ Schotten sectie 1"""
         if  self.M_Widget_1_1_2.isChecked():
             Case_nr_1 = Case_nr + 100000
-            B_schot_1= str(self.M_Widget_1_1_4.text())
-            L_schot_1 = str(self.M_Widget_1_1_6.text())
-            D_schot_1 = str(self.M_Widget_1_1_8.text())
-            G_schot_1 = str(self. M_Widget_1_1_10.text())
+            B_schot_1= str(self.M_Widget_1_1_4.text())        #input lezen van gui - breedte
+            L_schot_1 = str(self.M_Widget_1_1_6.text())       #lengte
+            D_schot_1 = str(self.M_Widget_1_1_8.text())       #dikte
+            G_schot_1 = str(self. M_Widget_1_1_10.text())     #volume gewicht
             Schot_1 = [float(B_schot_1), float(L_schot_1), float(D_schot_1), float(G_schot_1)]
 
-            n_schot = int(self.M_Widget_1_1_1.currentText())
+            n_schot = int(self.M_Widget_1_1_1.currentText())  #aantal lagen (1 of 2)
 
             if n_schot == 2:
                 B_schot_2 = str(self.M_Widget_1_2_4.text())
@@ -761,7 +762,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
             else:
                 Schot_2 = []
 
-            self.Calc_Bep_Schot(Q, mv, gws,  Schot_1, Schot_2, n_schot,Case_nr = Case_nr_1)
+            self.Calc_Bep_Schot(Q, mv, gws,  Schot_1, Schot_2, n_schot,Case_nr = Case_nr_1)   #run schotten berekening!
 
         """ Schotten sectie 2"""
         if  self.M_Widget_2_1_2.isChecked():
