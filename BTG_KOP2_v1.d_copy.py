@@ -724,6 +724,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         #Q is de Q_kraan, de kraanbelasting
         self.Plaxis_Input = []
         q_rep_plaxis = Q/(W*L)   #druk op de ondergrond van de belasting. Dat is gewicht/oppervlakte
+        #gamma_kraan, is afgeleid van de risico factor berekening, dus afhankelijk van RC 1, 2 etc
         q_d_plaxis = Q*self.gamma_kraan/(W*L)
         W_plaxis = min(W,L)         #width
         L_plaxis = max(W,L)         #length
@@ -731,7 +732,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         gws_plaxis = gws            #grondwaterstand
         D_plaxis = 0
         Gv_plaxis = "n.v.t."
-        Case_nr = 1000000
+        Case_nr = 1000000           #initieel case_nr, er wordt hier later bij opgeteld om cases te onderscheiden
         Case_1 = [Case_nr, q_rep_plaxis ,q_d_plaxis, W_plaxis, L_plaxis, gws_plaxis, fund_plaxis, D_plaxis,Gv_plaxis]
         self.Plaxis_Input.append(Case_1)
 
@@ -906,7 +907,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         if n_schot == 1:
             BGT_schot = Schot_1[2]*Schot_1[1]*Schot_1[0]*Schot_1[3]*9.81/1000 #schot_1 bevat breedte [0], lengte[1], dikte[2], dus dit is volume *9,81 is Belasting
             UGT_schot = BGT_schot*self.gamma_per
-            q_rep_plaxis = (Q+BGT_schot)/(Schot_1[0]*Schot_1[1])
+            q_rep_plaxis = (Q+BGT_schot)/(Schot_1[0]*Schot_1[1])  #hier is totale belasting: belasting kraan + belasting schot /(oppervlakte schot)
             q_d_plaxis = (Q*self.gamma_kraan + UGT_schot)/(Schot_1[0]*Schot_1[1])
             W_plaxis = min(Schot_1[0],Schot_1[1])  #Bepaal korte en lange kant
             L_plaxis = max(Schot_1[0],Schot_1[1])
@@ -985,9 +986,9 @@ class Create_Plaxis_Files(QTabWidget):   #define class
                 self.Calc_Combi_GMG(Q, mv, gws, Spreiding, Gv, Case=Case_2, D_fund =D_fund_cell, Case_nr = Case_nr_10)
 
         elif n_schot == 2:
-            BGT_schot_1 = Schot_1[2]*Schot_1[1]*Schot_1[0]*Schot_1[3]*9.81/1000
-            BGT_schot_2 = Schot_2[2]*Schot_2[1]*Schot_2[0]*Schot_2[3]*9.81/1000
-            BGT_schot = BGT_schot_1 + BGT_schot_2
+            BGT_schot_1 = Schot_1[2]*Schot_1[1]*Schot_1[0]*Schot_1[3]*9.81/1000 #belasting laag schotten 1
+            BGT_schot_2 = Schot_2[2]*Schot_2[1]*Schot_2[0]*Schot_2[3]*9.81/1000 #belasting laag schotten 2
+            BGT_schot = BGT_schot_1 + BGT_schot_2  #totale belasting
             UGT_schot = BGT_schot_1 * self.gamma_per + BGT_schot_2 * self.gamma_per
 
             q_rep_plaxis = (Q+BGT_schot)/(max(Schot_1[0],Schot_2[0])*max(Schot_1[1],Schot_2[1]))
