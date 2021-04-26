@@ -75,13 +75,17 @@ def create_materials(g_i, JSON_file, name, location):
 def assign_variables(g_i, Data):
     #04 Function to extract parameters from the JSON file and save them as a Plaxis Soil File
     print('#04')
-    no_SoilLayers = len(Data)
+
+    #Data is the JSON file!
+    no_SoilLayers = len(Data) #every row is one soil layer I guess
     Plx_Materials = []
     
     for SoilLayer in range(no_SoilLayers):
         
         Plx_Materials.append(SoilLayer)
         #Omdat Soil_Level_nr begint bij 0, maar de eerste datarij met materialen in SoilData met 1, moeten we er 1 optellen
+
+        #lees alle parameters per soillayer uit JSON file
         Material_name = Data.loc[SoilLayer, "Soil type\n[-]"]
 
         Cohesion = Data.loc[SoilLayer, "Cohesion\n[kPa]"]
@@ -119,13 +123,13 @@ def assign_variables(g_i, Data):
         q_rep = Data.loc[SoilLayer, "q_rep\n[kN/m]"]
         q_d = Data.loc[SoilLayer, "q_d\n[kN/m]"]
 
-    ####################################################################################################################################################################
+
         if q_d == 'not used in this model':
             Variations_mode = True
         else:
             Variations_mode = False #this means that we are doing variations with Loads instead of Parameters
 
-        G0ref = 4*EurRef/(2*(1+0.2))
+        G0ref = 4*EurRef/(2*(1+0.2)) #calculate ground model parameters
         KOnc = 1-np.sin(Friction_angle*np.pi/180)
         
         #Gamma07 = (1/(9*G0ref))*(2*Cohesion*(1+np.cos(2*Friction_angle*np.pi/180))+100*(1+KOnc)*np.sin(2*Friction_angle*np.pi/180))
@@ -173,7 +177,8 @@ def Create_Boreholes(Amount_of_Soil_Layers, JSON_file, g_i, List_Soillayers, nam
     g_i.borehole_main = g_i.borehole(0)
     
     Extra_layer = True
-    if Model_mode == False:
+    if Model_mode == False:  # input of model_mode is variation_mode, which means: if false we do variations with loads instead of parameters
+
         SoilEnh_Thickness = float(JSON_file.loc[0, "Thickness Soil\nEnhancement [m]"])
         New_border = ymax - SoilEnh_Thickness
         
