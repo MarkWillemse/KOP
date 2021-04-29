@@ -120,7 +120,7 @@ def assign_variables(g_i, Data):
 
         Area_W = Data.loc[SoilLayer, "Area Width\n[m]"]
         Area_L = Data.loc[SoilLayer, "Area Length\n[m]"]
-        q_rep = Data.loc[SoilLayer, "q_rep\n[kN/m]"]
+        q_rep = Data.loc[SoilLayer, "q_rep\n[kN/m]"]  #waarom is q_rep kN/m en niet kN/m2??
         q_d = Data.loc[SoilLayer, "q_d\n[kN/m]"]
 
 
@@ -286,11 +286,12 @@ def create_crane_load(g_i, JSON_file, name, location, Model_mode):
         Area_L_Copy = Area_L
         Area_L = Area_W
         Area_W = Area_L_Copy
-    
+
+    #deze worden op een andere plek wel gebruikt
     q_rep = float(JSON_file.loc[0, "q_rep\n[kN/m]"])
-    Load = q_rep
-    
-    q_load_crane = Load/Area_W
+    # Load = q_rep
+    #
+    # q_load_crane = Load/Area_W
 
     y_coordinate_load = JSON_file.loc[0,"Z, relative to\nNAP\n[m]"]
 
@@ -304,6 +305,52 @@ def create_crane_load(g_i, JSON_file, name, location, Model_mode):
         pass
     #bouw mesh nadat loads zijn toegevoegd
     generate_mesh(g_i, JSON_file=JSON_file, Model_mode=Model_mode, name=name, location=location)
+
+#voorgestelde functie:
+def create_plates(g_i, JSON_file, name, location, Model_mode):
+
+#HIER NOG KIJKEN WAT PLAATS VINDT IN KOP2 EN WAT IN KOP3
+
+    #dimension plate comes from JSON_file
+    Area_W_plate = float(JSON_file.loc[0, "Area Width\n[m]"])       #Geef locatie in JSON file
+    Area_L_plate = float(JSON_file.loc[0, "Area Length\n[m]"])      #Geef locatie in JSON file
+    if Area_W_plate > Area_L_plate:
+        Area_L_Copy = Area_L_plate
+        Area_L_plate = Area_W_plate
+        Area_W_plate = Area_L_Copy
+
+    q_rep = float(JSON_file.loc[0, "q_rep\n[kN/m]"])                #Geef locatie in JSON file:representatieve load
+    Load = q_rep
+
+    q_load_plate = Load / Area_W_plate
+
+    y_coordinate_load = JSON_file.loc[0, "Z, relative to\nNAP\n[m]"] #Geef locatie in JSON file
+
+    #define line coordinates
+    line_plate=g_i.line((0,0),(0,1))[-1]   #[-1] defines Line Object
+
+    #required parameters
+    EA = 4700000           # [kN/m]
+    EI = 20450             # [kN m2/m]
+    nu = 0.3
+
+    # derived parameters
+    d = math.sqrt(12 * EI / EA)     # [m]
+    E = EA / d
+    G = E / (2 * (1 + nu))
+
+    #collect plate material
+    plate_params = (('MaterialName', 'example_platemat'), ('IsIsotropic', True),
+                    ('Gref', G), ('d', d), ('nu', nu),
+                    ('EA', EA), ('EA2', EA), ('EI', EI))  #set up list with parameters for function
+    plate_mat = g_i.platemat(*plate_params)
+
+    #set plate
+    g_i.setmaterial(line_plate.Plate, plate_mat)
+
+
+# create_plates wordt aangeroepen met:
+# create_plates(g_i=g_i, JSON_file=JSON_file, name=name, location=location, Model_mode=Model_mode)
 
 #dit is de functie die de mesh instellingen geeft
 def generate_mesh(g_i, JSON_file, Model_mode, name, location):

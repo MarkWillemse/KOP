@@ -34,7 +34,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         self.BooleanThickness_2 = False
         self.BooleanThickness_3 = False     #some attributes are Booleans
         self.BooleanCollapse = True
-   
+
 
         """"Empty lists"""
         self.Layer_Values = []              #some attributes are lists
@@ -723,18 +723,26 @@ class Create_Plaxis_Files(QTabWidget):   #define class
     def Calc_Bep_Stemp(self, W, L, Q, mv, gws):
         #Q is de Q_kraan, de kraanbelasting
         self.Plaxis_Input = []
-        q_rep_plaxis = Q/(W*L)   #druk op de ondergrond van de belasting. Dat is gewicht/oppervlakte
+        q_rep_plaxis = Q/(W*L)   #druk op de ondergrond van de belasting. Dat is gewicht/oppervlakte  #bruikbaarheidsgrenstoestand
         #gamma_kraan, is afgeleid van de risico factor berekening, dus afhankelijk van RC 1, 2 etc
-        q_d_plaxis = Q*self.gamma_kraan/(W*L)
+        q_d_plaxis = Q*self.gamma_kraan/(W*L)   #uiterste grenstoestand
         W_plaxis = min(W,L)         #width
         L_plaxis = max(W,L)         #length
         fund_plaxis = mv            #aangrijppunt, dit moet misschien ook nog veranderd worden
         gws_plaxis = gws            #grondwaterstand
         D_plaxis = 0
         Gv_plaxis = "n.v.t."
+
+
+
         Case_nr = 1000000           #initieel case_nr, er wordt hier later bij opgeteld om cases te onderscheiden
         Case_1 = [Case_nr, q_rep_plaxis ,q_d_plaxis, W_plaxis, L_plaxis, gws_plaxis, fund_plaxis, D_plaxis,Gv_plaxis]
         self.Plaxis_Input.append(Case_1)
+
+
+        #dit hierboven^ is genoeg voor input van kraan belasting!
+
+        #======================================================================= hieronder scheiden van functie: ===========================
 
         # selecteer schotten parameters op basis van keuze in plaxis
         #Er zijn:
@@ -743,7 +751,15 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         # - Grondverbetering met horizontale geogrids (en zonder schotten)
         # - Grondverbetering met geocellen (en zonder schotten)(GMG)
 
+    # def select_situation(self):
+    #
+    #     Case_nr = 1000000  # initieel case_nr, er wordt hier later bij opgeteld om cases te onderscheiden
+
+
         """ Schotten sectie 1"""
+        #lees schotten informatie
+
+        #aparte widget selecteer functie maken:
         if  self.M_Widget_1_1_2.isChecked():
             Case_nr_1 = Case_nr + 100000
             B_schot_1= str(self.M_Widget_1_1_4.text())        #input lezen van gui - breedte
@@ -895,7 +911,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
                     D_fund_cell.append(float(custom_thickness))
             self.Calc_Combi_GMG(Q, mv, gws, Spreiding, Gv, Case=Case_1, D_fund =D_fund_cell, Case_nr = Case_nr_7)
 
-    #BEREKENING SCHOTTEN BELASTING
+    #BEREKENING SCHOTTEN BELASTING  ----- dit moet worden bekeken en aangepast voor plates berekening
     # berekening op basis van geselecteerde parameters in bovenstaande functie.
     """ Berekenening van belastingen, spreiding en funderingsniveaus bij toepassing van schotten """
     def Calc_Bep_Schot(self, Q , mv, gws, Schot_1, Schot_2, n_schot, Case_nr):
@@ -905,9 +921,12 @@ class Create_Plaxis_Files(QTabWidget):   #define class
 
         #opties voor als er één laag schotten is
         if n_schot == 1:
+            #BGT: bruikbaarheidsgrenstoestand
+            #UGT: uiterste grenstoestand
             BGT_schot = Schot_1[2]*Schot_1[1]*Schot_1[0]*Schot_1[3]*9.81/1000 #schot_1 bevat breedte [0], lengte[1], dikte[2], dus dit is volume *9,81 is Belasting
-            UGT_schot = BGT_schot*self.gamma_per
+            UGT_schot = BGT_schot*self.gamma_per                  #wat is gamma_per
             q_rep_plaxis = (Q+BGT_schot)/(Schot_1[0]*Schot_1[1])  #hier is totale belasting: belasting kraan + belasting schot /(oppervlakte schot)
+            #want schot_1[0] = lengte, schot_1[1] =  breedte
             q_d_plaxis = (Q*self.gamma_kraan + UGT_schot)/(Schot_1[0]*Schot_1[1])
             W_plaxis = min(Schot_1[0],Schot_1[1])  #Bepaal korte en lange kant
             L_plaxis = max(Schot_1[0],Schot_1[1])
