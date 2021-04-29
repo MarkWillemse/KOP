@@ -34,7 +34,7 @@ class Create_Plaxis_Files(QTabWidget):   #define class
         self.BooleanThickness_2 = False
         self.BooleanThickness_3 = False     #some attributes are Booleans
         self.BooleanCollapse = True
-
+   
 
         """"Empty lists"""
         self.Layer_Values = []              #some attributes are lists
