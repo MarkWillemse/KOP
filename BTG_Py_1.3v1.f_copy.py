@@ -42,7 +42,7 @@ def Open_json(s_i, g_i):
             print('#02')
             projecttitle = Plx_file[:-5]
             Plx_file = str(location + str("\\") + Plx_file)
-            Plx_file_df = pd.read_json(Plx_file)
+            Plx_file_df = pd.read_json(Plx_file)   #convert JSON to pandas dataframe!
             
             print(projecttitle)
            
@@ -81,12 +81,20 @@ def assign_variables(g_i, Data):
     Plx_Materials = []
     
     for SoilLayer in range(no_SoilLayers):
+
+
+        #PLAN VAN AANPAK: maak 2 soil profiles hier?? of zelfs 3??
+        # Als houten schotten dan een extra laag bovenop, of zelfs 2.
+
+        #dus op einde: append houten schot (of misschien wel als eerste, afhankelijk van volgorde laden)
         
         Plx_Materials.append(SoilLayer)
         #Omdat Soil_Level_nr begint bij 0, maar de eerste datarij met materialen in SoilData met 1, moeten we er 1 optellen
 
         #lees alle parameters per soillayer uit JSON file
         Material_name = Data.loc[SoilLayer, "Soil type\n[-]"]
+
+        #voor hout, material_name='houten schotten'
 
         Cohesion = Data.loc[SoilLayer, "Cohesion\n[kPa]"]
        
@@ -118,7 +126,7 @@ def assign_variables(g_i, Data):
         Enhancement_Type = Data.loc[SoilLayer, "Soil type\nenhancement"]
 
 
-        Area_W = Data.loc[SoilLayer, "Area Width\n[m]"]
+        Area_W = Data.loc[SoilLayer, "Area Width\n[m]"]             #komt dit uit de excel file?
         Area_L = Data.loc[SoilLayer, "Area Length\n[m]"]
         q_rep = Data.loc[SoilLayer, "q_rep\n[kN/m]"]  #waarom is q_rep kN/m en niet kN/m2??
         q_d = Data.loc[SoilLayer, "q_d\n[kN/m]"]
@@ -151,6 +159,8 @@ def assign_variables(g_i, Data):
                    ('DrainageType', Drainage_Type),
                    ("powerm", Power)]
         #Soilname = g_i.soilmat(*Soil_params)
+
+
 
         Plx_Materials[SoilLayer] = g_i.soilmat(*Soil_params)
         try:

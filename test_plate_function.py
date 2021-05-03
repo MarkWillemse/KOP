@@ -8,70 +8,6 @@ Schot_1 = [float(B_schot_1), float(L_schot_1), float(D_schot_1), float(G_schot_1
 n_schot = int(self.M_Widget_1_1_1.currentText())  # aantal lagen (1 of 2)
 
 
-
-
-
-#=============================================== KOP 3 veranderingen =================================================
-#voorgestelde functie in KOP3:
-#voor STAAL modeleren we als plate object
-def create_plates_staal(g_i, JSON_file, name, location, Model_mode):
-
-#HIER NOG KIJKEN WAT PLAATS VINDT IN KOP2 EN WAT IN KOP3
-
-    #dimension plate comes from JSON_file
-    Area_W_plate = float(JSON_file.loc[0, "Area Width\n[m]"])       #Geef locatie in JSON file
-    Area_L_plate = float(JSON_file.loc[0, "Area Length\n[m]"])      #Geef locatie in JSON file
-    if Area_W_plate > Area_L_plate:
-        Area_L_Copy = Area_L_plate
-        Area_L_plate = Area_W_plate
-        Area_W_plate = Area_L_Copy
-
-    q_rep = float(JSON_file.loc[0, "q_rep\n[kN/m]"])                #Geef locatie in JSON file:representatieve load
-    Load = q_rep
-
-    q_load_plate = Load / Area_W_plate
-
-    y_coordinate_load = JSON_file.loc[0, "Z, relative to\nNAP\n[m]"] #Geef locatie in JSON file
-
-    #define line coordinates
-    line_plate=g_i.line((0,0),(0,1))[-1]   #[-1] defines Line Object
-
-    #required parameters
-    EA = 4700000           # [kN/m]
-    EI = 20450             # [kN m2/m]
-    nu = 0.3
-
-    # derived parameters
-    d = math.sqrt(12 * EI / EA)     # [m]
-    E = EA / d
-    G = E / (2 * (1 + nu))
-
-    #collect plate material
-    plate_params = (('MaterialName', 'example_platemat'), ('IsIsotropic', True),
-                    ('Gref', G), ('d', d), ('nu', nu),
-                    ('EA', EA), ('EA2', EA), ('EI', EI))  #set up list with parameters for function
-    plate_mat = g_i.platemat(*plate_params)
-
-    #set plate
-    g_i.setmaterial(line_plate.Plate, plate_mat)
-
-
-
-#nog voorgestelde functie KOP 3
-
-def create_volume_hout():
-    #iets in het kader als:
-    g_i.borehole_main = g_i.borehole(0)  #maar eigenlijk moet hij worden toegevoegd aan de borehole
-
-    g_i.soillayer(0)  # creert een grondlaag
-    g_i.setsoillayerlevel(g_i.borehole_main, number, upper_boundary)  # creert een laaglevel
-
-
-
-# create_plates wordt aangeroepen met:
-# create_plates(g_i=g_i, JSON_file=JSON_file, name=name, location=location, Model_mode=Model_mode)
-
-
 #==================================================== KOP 2 veranderingen =============================================
 
 #Huidige functie in KOP2 : moet op de schop
@@ -149,9 +85,15 @@ def select_situation(self):
         D_schot_1 = str(self.M_Widget_1_1_8.text())  # dikte
         G_schot_1 = str(self.M_Widget_1_1_10.text())  # volume gewicht
 
+
+        # select material option: same type of choice as amount of mat layers
+        material = str(self.M_Widget_1_1_12.currentText())
+
         Schot_1 = [float(B_schot_1), float(L_schot_1), float(D_schot_1), float(G_schot_1)]
 
         n_schot = int(self.M_Widget_1_1_1.currentText())  # aantal lagen (1 of 2)
+
+
 
     if n_schot == 2:  "option for two mats"
         B_schot_2 = str(self.M_Widget_1_2_4.text())
@@ -530,7 +472,169 @@ def Calc_Combi_GMG(self, Q, mv, gws, Spreiding, Gv, Case, D_fund, Case_nr):
 
 
 
+#=============================================== KOP 3 veranderingen =================================================
+#voorgestelde functie in KOP3:
+#voor STAAL modeleren we als plate object
+def create_plates_staal(g_i, JSON_file, name, location, Model_mode):
+
+#HIER NOG KIJKEN WAT PLAATS VINDT IN KOP2 EN WAT IN KOP3
+
+    #dimension plate comes from JSON_file
+    Area_W_plate = float(JSON_file.loc[0, "Area Width\n[m]"])       #Geef locatie in JSON file
+    Area_L_plate = float(JSON_file.loc[0, "Area Length\n[m]"])      #Geef locatie in JSON file
+    if Area_W_plate > Area_L_plate:
+        Area_L_Copy = Area_L_plate
+        Area_L_plate = Area_W_plate
+        Area_W_plate = Area_L_Copy
+
+    q_rep = float(JSON_file.loc[0, "q_rep\n[kN/m]"])                #Geef locatie in JSON file:representatieve load
+    Load = q_rep
+
+    q_load_plate = Load / Area_W_plate
+
+    y_coordinate_load = JSON_file.loc[0, "Z, relative to\nNAP\n[m]"] #Geef locatie in JSON file
+
+    #define line coordinates
+    line_plate=g_i.line((0,0),(0,1))[-1]   #[-1] defines Line Object
+
+    #required parameters
+    EA = 4700000           # [kN/m]
+    EI = 20450             # [kN m2/m]
+    nu = 0.3
+
+    # derived parameters
+    d = math.sqrt(12 * EI / EA)     # [m]
+    E = EA / d
+    G = E / (2 * (1 + nu))
+
+    #collect plate material
+    plate_params = (('MaterialName', 'example_platemat'), ('IsIsotropic', True),
+                    ('Gref', G), ('d', d), ('nu', nu),
+                    ('EA', EA), ('EA2', EA), ('EI', EI))  #set up list with parameters for function
+    plate_mat = g_i.platemat(*plate_params)
+
+    #set plate
+    g_i.setmaterial(line_plate.Plate, plate_mat)
+
+
+
+#nog voorgestelde functie KOP 3
+
+def create_volume_hout():
+    #iets in het kader als:
+    g_i.borehole_main = g_i.borehole(0)  #maar eigenlijk moet hij worden toegevoegd aan de borehole
+
+    g_i.soillayer(0)  # creert een grondlaag
+    g_i.setsoillayerlevel(g_i.borehole_main, number, upper_boundary)  # creert een laaglevel
+
+
+
+# create_plates wordt aangeroepen met:
+# create_plates(g_i=g_i, JSON_file=JSON_file, name=name, location=location, Model_mode=Model_mode)
+
+#Bestaande functie in KOP3:
+def create_crane_load(g_i, JSON_file, name, location, Model_mode):
+    ## 06. Create crane loads for the different phases
+    print('#06')
+    # Crane Load:
+    # we will set the load values in staged construction
+    Area_W = float(JSON_file.loc[0, "Area Width\n[m]"])
+    Area_L = float(JSON_file.loc[0, "Area Length\n[m]"])
+
+    if Area_W > Area_L:
+        Area_L_Copy = Area_L
+        Area_L = Area_W
+        Area_W = Area_L_Copy
+
+    # deze worden op een andere plek wel gebruikt
+    q_rep = float(JSON_file.loc[0, "q_rep\n[kN/m]"])
+    # Load = q_rep
+    #
+    # q_load_crane = Load/Area_W
+
+    y_coordinate_load = JSON_file.loc[0, "Z, relative to\nNAP\n[m]"]
+
+    g_i.lineload(-(Area_W / 2), y_coordinate_load,
+                 (Area_W / 2), y_coordinate_load)
+
+    try:
+        g_i.LineLoads[-1].Name = "Craneload q_rep"
+    except:
+        pass
+    # bouw mesh nadat loads zijn toegevoegd
+    generate_mesh(g_i, JSON_file=JSON_file, Model_mode=Model_mode, name=name, location=location)
 
 
 
 
+
+
+
+
+
+def load_houten_database():
+    #hardcode these elements from the testsom
+    Material_name = "Houten schotten"
+
+    # voor hout, material_name='houten schotten'
+
+    Cohesion = Data.loc[SoilLayer, "Cohesion\n[kPa]"]
+
+    Conusfactor = Data.loc[SoilLayer, "Conusfactor\n[-]"]
+    Delta = Data.loc[SoilLayer, "Delta\n[]"]
+    E50ref = Data.loc[SoilLayer, "E'50ref\n[kPa]"]
+    Eoed = Data.loc[SoilLayer, "Eoed\n[kPa]"]
+    EurRef = Data.loc[SoilLayer, "EurRef\n[kPa]"]
+    GWL = Data.loc[SoilLayer, "GWL\n[m]"]
+    Initial_ssm = Data.loc[SoilLayer, "Initial shear\nstrain modulus\n[kPa]"]
+    Friction_angle = Data.loc[SoilLayer, "Internal friction\nangle"]
+
+    Lower_Soil_Boundary = Data.loc[SoilLayer, "Lower soil boundary\n[m]"]
+    # Normalised_conus_resistance = Data.loc[SoilLayer,"Normalised\nconus resistance\n[Mpa]"]
+    OCR = Data.loc[SoilLayer, "OCR\n[-]"]
+    POP = Data.loc[SoilLayer, "POP\n[-]"]
+    Power = Data.loc[SoilLayer, "Power\n[-]"]
+    Rinter = Data.loc[SoilLayer, "RInter\n[-]"]
+    Shear_strain = Data.loc[SoilLayer, "Shear strain\n[-]"]
+    # Undrained_shear_strenght = Data.loc[SoilLayer,"Undrained\nshear strenght\n[kPa]"]
+    ydry = Data.loc[SoilLayer, "ydry\n[kN/m^3]"]
+    ysaturated = Data.loc[SoilLayer, "ysaturated\n[kN/m^3]"]
+    Drainage_Type = Data.loc[SoilLayer, "DrainageType\n[-]"]
+    Thickness = Data.loc[SoilLayer, "Thickness\n[m]"]
+    Lower_Soil_Boundary = Data.loc[SoilLayer, "Lower soil boundary\n[m]"]
+    Upper_soil_boundary = Data.loc[SoilLayer, "Upper soil boundary\n[m]"]
+    Z = Data.loc[SoilLayer, "Z, relative to\nNAP\n[m]"]
+    Thickness_Soil_Enhancement = Data.loc[SoilLayer, "Thickness Soil\nEnhancement [m]"]
+    Enhancement_Type = Data.loc[SoilLayer, "Soil type\nenhancement"]
+
+    Area_W = Data.loc[SoilLayer, "Area Width\n[m]"]  # komt dit uit de excel file?
+    Area_L = Data.loc[SoilLayer, "Area Length\n[m]"]
+    q_rep = Data.loc[SoilLayer, "q_rep\n[kN/m]"]  # waarom is q_rep kN/m en niet kN/m2??
+    q_d = Data.loc[SoilLayer, "q_d\n[kN/m]"]
+
+    if q_d == 'not used in this model':
+        Variations_mode = True
+    else:
+        Variations_mode = False  # this means that we are doing variations with Loads instead of Parameters
+
+    G0ref = 4 * EurRef / (2 * (1 + 0.2))  # calculate ground model parameters
+    KOnc = 1 - np.sin(Friction_angle * np.pi / 180)
+
+    # Gamma07 = (1/(9*G0ref))*(2*Cohesion*(1+np.cos(2*Friction_angle*np.pi/180))+100*(1+KOnc)*np.sin(2*Friction_angle*np.pi/180))
+    Soil_params = [("MaterialName", Material_name),
+                   ("SoilModel", 4),
+                   ("POP", POP),
+                   ("OCR", OCR),
+                   ("gammaUnsat", ydry),
+                   ("gammaSat", ysaturated),
+                   ("cref", Cohesion),
+                   ("E50ref", E50ref),
+                   ("Eoedref", Eoed),
+                   ("Eurref", EurRef),
+                   ("K0NC", KOnc),
+                   ("gamma07", Shear_strain),
+                   ("G0ref", G0ref),
+                   ("phi", Friction_angle),
+                   ("Rinter", Rinter),
+                   ('DrainageType', Drainage_Type),
+                   ("powerm", Power)]
